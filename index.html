@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>จดหมายผนึกเวลา · ถึงตัวเองในวันเกษียณ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-page:#DCD6C2;
+    --paper:#EAE6D4;
+    --paper-line:#BDB28C;
+    --ink:#1E2B38;
+    --ink-soft:#56666E;
+    --seal:#8B6A2E;
+    --seal-dark:#6E5322;
+    --growth:#3C5E45;
+    --danger:#7A3B2E;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg-page);
+    font-family:'Sarabun',sans-serif;
+    color:var(--ink);
+    min-height:100vh;
+  }
+  .shell{
+    max-width:1080px;
+    margin:0 auto;
+    padding:28px 16px 60px;
+  }
+  .top-note{
+    text-align:center;
+    font-size:13px;
+    color:var(--ink-soft);
+    letter-spacing:.04em;
+    margin-bottom:22px;
+  }
+  .layout{
+    display:grid;
+    grid-template-columns: 1fr;
+    gap:28px;
+  }
+  @media (min-width: 880px){
+    .layout{ grid-template-columns: 360px 1fr; align-items:start; }
+    .preview-wrap{ position:sticky; top:24px; }
+  }
+
+  /* ---------- Controls ---------- */
+  .controls{
+    background:#F4F1E6;
+    border:1px solid var(--paper-line);
+    border-radius:10px;
+    padding:20px;
+  }
+  .controls h2{
+    font-size:15px;
+    margin:0 0 14px;
+    letter-spacing:.03em;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+  }
+  .field{ margin-bottom:14px; }
+  .field label{
+    display:block;
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-bottom:4px;
+  }
+  .field input, .field textarea{
+    width:100%;
+    padding:9px 10px;
+    border:1px solid var(--paper-line);
+    border-radius:6px;
+    background:#fff;
+    font-family:'Sarabun',sans-serif;
+    font-size:14.5px;
+    color:var(--ink);
+  }
+  .field textarea{ min-height:120px; resize:vertical; line-height:1.5; }
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .hint{ font-size:12px; color:var(--ink-soft); margin-top:4px; }
+
+  .print-btn{
+    width:100%;
+    margin-top:6px;
+    padding:12px;
+    border:none;
+    border-radius:7px;
+    background:var(--growth);
+    color:#fff;
+    font-family:'Sarabun',sans-serif;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    letter-spacing:.02em;
+  }
+  .print-btn:hover{ background:#2f4a37; }
+
+  /* ---------- Card / Letter ---------- */
+  .preview-wrap{ display:flex; justify-content:center; }
+  .card{
+    width:100%;
+    max-width:520px;
+    background:var(--paper);
+    border:1px solid var(--paper-line);
+    border-radius:4px;
+    padding:30px 26px 22px;
+    position:relative;
+    box-shadow:0 14px 30px -16px rgba(30,30,20,.45);
+  }
+  .eyebrow{
+    font-size:11.5px;
+    letter-spacing:.16em;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    margin:0 0 4px;
+  }
+  .title{
+    font-family:'Mali',sans-serif;
+    font-weight:600;
+    font-size:24px;
+    margin:0 0 2px;
+    line-height:1.25;
+  }
+  .subdate{ font-size:12.5px; color:var(--ink-soft); }
+
+  .seal{
+    position:absolute;
+    top:22px; right:22px;
+    width:88px; height:88px;
+    border-radius:50%;
+    border:2px solid var(--seal);
+    outline:1px dashed var(--seal);
+    outline-offset:4px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    transform:rotate(-7deg);
+    color:var(--seal-dark);
+    text-align:center;
+    background:rgba(139,106,46,0.05);
+  }
+  .seal small{ font-size:8.5px; letter-spacing:.08em; line-height:1.1; }
+  .seal .yr{ font-family:'Mali',sans-serif; font-weight:700; font-size:19px; line-height:1.1; margin:1px 0; }
+
+  .perf{
+    display:flex;
+    justify-content:space-between;
+    border-top:2px dashed var(--paper-line);
+    margin:18px 0 16px;
+    height:0;
+  }
+  .perf span{
+    width:6px; height:6px; border-radius:50%;
+    background:var(--bg-page);
+    transform:translateY(-4px);
+  }
+
+  .ledger{ width:100%; border-collapse:collapse; margin-bottom:14px; }
+  .ledger tr{ border-bottom:1px dotted var(--paper-line); }
+  .ledger tr:last-child{ border-bottom:none; }
+  .ledger td{ padding:7px 0; vertical-align:top; }
+  .ledger td.lbl{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    width:46%;
+    padding-right:8px;
+    line-height:1.35;
+  }
+  .ledger td.val{
+    font-size:14.5px;
+    font-weight:600;
+    text-align:right;
+    font-variant-numeric: tabular-nums;
+  }
+  .ledger td.val .unit{ font-size:11px; font-weight:400; color:var(--ink-soft); margin-left:3px; }
+
+  .chart-box{ margin:6px 0 16px; }
+  .chart-cap{ font-size:11px; color:var(--ink-soft); display:flex; justify-content:space-between; margin-top:4px; }
+
+  .letter-body{
+    font-family:'Mali',sans-serif;
+    font-size:15.5px;
+    line-height:1.85;
+    white-space:pre-wrap;
+    margin:4px 0 10px;
+  }
+  .sign-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    font-family:'Mali',sans-serif;
+    font-size:15px;
+    margin-top:6px;
+  }
+  .sign-row .who{ font-weight:700; }
+  .sign-row .when{ font-size:12px; color:var(--ink-soft); font-family:'Sarabun',sans-serif; }
+
+  .footer{
+    margin-top:18px;
+    padding-top:10px;
+    border-top:1px solid var(--paper-line);
+    font-size:10.5px;
+    color:var(--ink-soft);
+    line-height:1.5;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:10px;
+  }
+  .footer .advisor{ font-weight:600; color:var(--ink); }
+  .footer .advisor .contact{ font-weight:400; color:var(--ink-soft); }
+  .disclaimer{ max-width:58%; text-align:right; }
+
+  @media print{
+    body{ background:#fff; }
+    .top-note, .controls, .shell .layout > div:first-child{ display:none !important; }
+    .shell{ padding:0; max-width:none; }
+    .layout{ display:block; }
+    .preview-wrap{ position:static; display:block; }
+    .card{ box-shadow:none; max-width:100%; margin:0 auto; border:1px solid #999; }
+    @page{ size:A4; margin:14mm; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <p class="top-note">ออกแบบมาให้แต่ละคนกรอกข้อมูลของตัวเอง แล้วกด “พิมพ์การ์ดนี้” เพื่อปริ้นต์เก็บไว้</p>
+  <div class="layout">
+
+    <div class="controls">
+      <h2>กรอกข้อมูลของคุณ</h2>
+
+      <div class="field">
+        <label for="name">ชื่อ</label>
+        <input id="name" type="text" value="คุณนักลงทุน">
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label for="ageNow">อายุปัจจุบัน</label>
+          <input id="ageNow" type="number" value="30">
+        </div>
+        <div class="field">
+          <label for="ageRetire">อายุที่ตั้งใจเกษียณ</label>
+          <input id="ageRetire" type="number" value="55">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="fv">เป้าหมายเงินเมื่อเกษียณ (บาท)</label>
+        <input id="fv" type="number" value="10000000">
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label for="pv">เงินก้อนที่ลงทุนวันนี้ (บาท)</label>
+          <input id="pv" type="number" value="100000">
+        </div>
+        <div class="field">
+          <label for="pmt">DCA ต่อเดือน (บาท)</label>
+          <input id="pmt" type="number" value="5000">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="rate">ผลตอบแทนเฉลี่ยที่คาดหวัง/ปี (%)</label>
+        <input id="rate" type="number" step="0.1" value="8">
+        <p class="hint">เป็นสมมติฐานเพื่อการศึกษา ไม่ใช่การันตีผลตอบแทน</p>
+      </div>
+
+      <div class="field">
+        <label for="funds">พอร์ต/กองทุนที่เลือกลงทุน</label>
+        <input id="funds" type="text" value="กองทุนหุ้นไทย, กองทุนหุ้นโลก, ตราสารหนี้ระยะสั้น">
+      </div>
+
+      <div class="field">
+        <label for="letter">ข้อความถึงตัวเองในอนาคต</label>
+        <textarea id="letter">วันนี้ฉันเพิ่งเข้าใจว่าดอกเบี้ยทบต้นทำงานอย่างไร และตัดสินใจเริ่มต้นลงทุนแม้ตัวเลขจะดูเล็กน้อย
+
+ขอบคุณที่ในวันนี้ฉันเลือกจะเริ่ม ไม่ใช่เพราะมันง่าย แต่เพราะอยากให้ตัวเองในวันข้างหน้ามีทางเลือกมากกว่านี้
+
+ขอให้จดหมายฉบับนี้เตือนใจว่า ทุกเดือนที่อดทนลงทุนต่อไป คือก้าวเล็กๆ ที่พาฉันมาถึงวันนี้</textarea>
+      </div>
+
+      <div class="field">
+        <label for="advisor">ชื่อที่ปรึกษาการลงทุน</label>
+        <input id="advisor" type="text" value="ที่ปรึกษาการลงทุน สุภานต์ ทิมมณีฉาย">
+      </div>
+
+      <div class="field">
+        <label for="advisorContact">เบอร์โทร / LineID</label>
+        <input id="advisorContact" type="text" value="0966450505, LineID :Superman_fx">
+      </div>
+
+      <button class="print-btn" onclick="window.print()">พิมพ์การ์ดนี้</button>
+    </div>
+
+    <div class="preview-wrap">
+      <div class="card" id="card">
+        <p class="eyebrow">TIME-SEALED LETTER · จดหมายผนึกเวลา</p>
+        <p class="title">ถึงตัวเองในวันเกษียณ</p>
+        <p class="subdate" id="writtenDate"></p>
+
+        <div class="seal">
+          <small>ปิดผนึกไว้</small>
+          <div class="yr" id="sealYear">พ.ศ. —</div>
+          <small>จึงเปิดอ่าน</small>
+        </div>
+
+        <div class="perf" id="perf1"></div>
+
+        <table class="ledger">
+          <tr>
+            <td class="lbl">เป้าหมายเมื่อเกษียณ</td>
+            <td class="val" id="rFv">—</td>
+          </tr>
+          <tr>
+            <td class="lbl">เงินตั้งต้นวันนี้</td>
+            <td class="val" id="rPv">—</td>
+          </tr>
+          <tr>
+            <td class="lbl">ลงทุนทุกเดือน (DCA)</td>
+            <td class="val" id="rPmt">—</td>
+          </tr>
+          <tr>
+            <td class="lbl">ผลตอบแทนเฉลี่ยที่ตั้งไว้/ปี</td>
+            <td class="val" id="rRate">—</td>
+          </tr>
+          <tr>
+            <td class="lbl">ระยะเวลาลงทุน</td>
+            <td class="val" id="rYears">—</td>
+          </tr>
+          <tr>
+            <td class="lbl">พอร์ตที่เลือกลงทุน</td>
+            <td class="val" id="rFunds">—</td>
+          </tr>
+        </table>
+
+        <div class="chart-box">
+          <svg id="chart" width="100%" height="78" viewBox="0 0 460 78" preserveAspectRatio="none"></svg>
+          <div class="chart-cap">
+            <span id="capStart">วันนี้</span>
+            <span id="capEnd">ปีที่เกษียณ</span>
+          </div>
+        </div>
+
+        <div class="perf" id="perf2"></div>
+
+        <p class="letter-body" id="letterOut"></p>
+
+        <div class="sign-row">
+          <span class="who" id="signWho">รักและขอบคุณตัวเองในวันนี้,</span>
+          <span class="when" id="signWhen"></span>
+        </div>
+
+        <div class="footer">
+          <span class="advisor">
+            <span id="advisorOut">ที่ปรึกษาการลงทุน สุภานต์ ทิมมณีฉาย</span><br>
+            <span id="advisorContactOut" class="contact">0966450505, LineID :Superman_fx</span>
+          </span>
+          <span class="disclaimer">ผลตอบแทนที่ใช้คำนวณเป็นสมมติฐานเพื่อการศึกษาเท่านั้น ผลการดำเนินงานในอดีตและสมมติฐานที่ใช้ไม่ได้เป็นการยืนยันผลตอบแทนในอนาคต</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const TODAY = new Date(2026, 5, 25); // 25 June 2026, fixed app "today"
+const THAI_MONTHS = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+
+function thaiYear(d){ return d.getFullYear() + 543; }
+function fmtThaiDate(d){
+  return `${d.getDate()} ${THAI_MONTHS[d.getMonth()]} ${thaiYear(d)}`;
+}
+function baht(n){
+  if(isNaN(n)) return "—";
+  return Math.round(n).toLocaleString('en-US');
+}
+function escapeHtml(s){
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+function makeHoles(el){
+  el.innerHTML = "";
+  for(let i=0;i<26;i++){
+    const s = document.createElement('span');
+    el.appendChild(s);
+  }
+}
+makeHoles(document.getElementById('perf1'));
+makeHoles(document.getElementById('perf2'));
+
+function fvSeries(pv, pmtMonthly, r, years){
+  const pts = [];
+  const n = Math.max(1, Math.min(60, Math.round(years)));
+  for(let t=0; t<=n; t++){
+    let fv;
+    if(Math.abs(r) < 1e-9){
+      fv = pv + pmtMonthly*12*t;
+    } else {
+      fv = pv*Math.pow(1+r, t) + pmtMonthly*12*((Math.pow(1+r, t)-1)/r);
+    }
+    pts.push(fv);
+  }
+  return pts;
+}
+
+function render(){
+  const name = document.getElementById('name').value.trim() || "คุณนักลงทุน";
+  const ageNow = parseFloat(document.getElementById('ageNow').value) || 0;
+  const ageRetire = parseFloat(document.getElementById('ageRetire').value) || 0;
+  const fv = parseFloat(document.getElementById('fv').value) || 0;
+  const pv = parseFloat(document.getElementById('pv').value) || 0;
+  const pmt = parseFloat(document.getElementById('pmt').value) || 0;
+  const ratePct = parseFloat(document.getElementById('rate').value) || 0;
+  const funds = document.getElementById('funds').value.trim() || "—";
+  const letterTxt = document.getElementById('letter').value;
+  const advisor = document.getElementById('advisor').value.trim() || "ที่ปรึกษาการลงทุน สุภานต์ ทิมมณีฉาย";
+  const advisorContact = document.getElementById('advisorContact').value.trim() || "0966450505, LineID :Superman_fx";
+
+  const years = Math.max(1, ageRetire - ageNow);
+  const r = ratePct/100;
+  const reopenYear = thaiYear(TODAY) + years;
+
+  document.getElementById('writtenDate').textContent = `เขียนวันที่ ${fmtThaiDate(TODAY)}`;
+  document.getElementById('sealYear').textContent = `พ.ศ. ${reopenYear}`;
+
+  document.getElementById('rFv').innerHTML = `${baht(fv)}<span class="unit">บาท</span>`;
+  document.getElementById('rPv').innerHTML = `${baht(pv)}<span class="unit">บาท</span>`;
+  document.getElementById('rPmt').innerHTML = `${baht(pmt)}<span class="unit">บาท/เดือน</span>`;
+  document.getElementById('rRate').innerHTML = `${ratePct.toLocaleString('en-US')}<span class="unit">% ต่อปี</span>`;
+  document.getElementById('rYears').innerHTML = `${years}<span class="unit">ปี (อายุ ${ageNow}→${ageRetire})</span>`;
+  document.getElementById('rFunds').textContent = funds;
+
+  document.getElementById('letterOut').innerHTML =
+    `ถึงตัวเองในวันที่เปิดจดหมายฉบับนี้ (พ.ศ. ${reopenYear}),\n\n` + escapeHtml(letterTxt);
+
+  document.getElementById('signWho').textContent = `รักและขอบคุณตัวเองในวันนี้, ${name}`;
+  document.getElementById('signWhen').textContent = `เขียนไว้วันที่ ${fmtThaiDate(TODAY)}`;
+  document.getElementById('advisorOut').textContent = advisor;
+  document.getElementById('advisorContactOut').textContent = advisorContact;
+
+  document.getElementById('capStart').textContent = `วันนี้ · ${baht(pv)} บาท`;
+  document.getElementById('capEnd').textContent = `พ.ศ. ${reopenYear} · เป้าหมาย ${baht(fv)} บาท`;
+
+  // sparkline
+  const series = fvSeries(pv, pmt, r, years);
+  const max = Math.max(...series, fv, 1);
+  const w = 460, h = 78, pad = 6;
+  const n = series.length - 1;
+  const pts = series.map((v,i) => {
+    const x = pad + (i/n) * (w - pad*2);
+    const y = h - pad - (v/max) * (h - pad*2);
+    return [x,y];
+  });
+  const path = pts.map((p,i)=> (i===0?"M":"L") + p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ");
+  const svg = document.getElementById('chart');
+  const last = pts[pts.length-1];
+  const first = pts[0];
+  svg.innerHTML = `
+    <path d="${path}" fill="none" stroke="var(--growth)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${first[0]}" cy="${first[1]}" r="3" fill="var(--ink-soft)"/>
+    <circle cx="${last[0]}" cy="${last[1]}" r="3.5" fill="var(--seal)"/>
+  `;
+}
+
+document.querySelectorAll('#name,#ageNow,#ageRetire,#fv,#pv,#pmt,#rate,#funds,#letter,#advisor,#advisorContact')
+  .forEach(el => el.addEventListener('input', render));
+
+render();
+</script>
+</body>
+</html>
